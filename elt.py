@@ -1,5 +1,17 @@
 import argparse
+import configparser
+import os
+from pyspark.sql import SparkSession
 import textwrap
+
+config = configparser.ConfigParser()
+config.read('dl.cfg')
+
+# set up environment variables to enable S3 access
+os.environ['AWS_ACCESS_KEY_ID'] = config['AWS_ACCESS_KEY_ID']
+os.environ['AWS_SECRET_ACCESS_KEY'] = config['AWS_SECRET_ACCESS_KEY']
+
+OUTPUT_FOLDER = "analytics"
 
 
 def create_spark_session():
@@ -11,7 +23,11 @@ def create_spark_session():
     Returns:
         session object
     """
-    pass
+    spark = SparkSession \
+        .builder \
+        .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:2.7.0") \
+        .getOrCreate()
+    return spark
 
 
 def process_song_data(spark, input_data, output_data):
