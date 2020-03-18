@@ -42,7 +42,33 @@ def process_song_data(spark, input_data, output_data):
     Returns:
         None
     """
-    pass
+    # get filepath to song data file
+    song_data = os.path.join(input_data, "song_data", '*', '*', '*', "*.json")
+
+    # read song data file
+    df = spark.read.json(song_data)
+
+    # extract columns to create songs table
+    songs_table = df.select(
+        "song_id", "title", "artist_id", "year", "duration")
+
+    # write songs table to parquet files partitioned by year and artist
+    songs_table.write \
+               .partitionBy("year", "artist_id") \
+               .parquet(
+                   os.path.join(output_data, OUTPUT_FOLDER, "songs.parquet"))
+
+    # extract columns to create artists table
+    artists_table = df.selectExpr("artist_id",
+                                  "artist_name as name",
+                                  "artist_location as location",
+                                  "artist_latitude as latitude",
+                                  "artist_longitude as longitude") \
+                      .dropDuplicates()
+
+    # write artists table to parquet files
+    artists_table.write.partitionBy("artist_id").parquet(
+        os.path.join(output_data, OUTPUT_FOLDER, "artists.parquet"))
 
 
 def process_log_data(spark, input_data, output_data):
