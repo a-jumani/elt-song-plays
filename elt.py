@@ -17,6 +17,8 @@ os.environ['AWS_ACCESS_KEY_ID'] = config['AWS_ACCESS_KEY_ID']
 os.environ['AWS_SECRET_ACCESS_KEY'] = config['AWS_SECRET_ACCESS_KEY']
 
 OUTPUT_FOLDER = "analytics"
+PATH_TO_SONGS = ["song_data", '*', '*', '*', "*.json"]
+PATH_TO_LOGS = ["log_data", '*', '*', "*.json"]
 
 
 def create_spark_session():
@@ -48,7 +50,7 @@ def process_song_data(spark, input_data, output_data):
         None
     """
     # get filepath to song data file
-    song_data = os.path.join(input_data, "song_data", '*', '*', '*', "*.json")
+    song_data = os.path.join(input_data, *PATH_TO_SONGS)
 
     # read song data file
     df = spark.read.json(song_data)
@@ -89,7 +91,7 @@ def process_log_data(spark, input_data, output_data):
         None
     """
     # get filepath to log data file
-    log_data = os.path.join(input_data, "log_data", '*', '*', "*.json")
+    log_data = os.path.join(input_data, *PATH_TO_LOGS)
 
     # read log data file
     df = spark.read.json(log_data)
@@ -132,8 +134,7 @@ def process_log_data(spark, input_data, output_data):
         os.join.path(output_data, OUTPUT_FOLDER, "time.parquet"))
 
     # read in song data to use for songplays table
-    song_df = spark.read.json(
-        os.path.join(input_data, "song_data", '*', '*', '*', "*.json"))
+    song_df = spark.read.json(os.path.join(input_data, *PATH_TO_SONGS))
 
     # extract columns from joined song and log datasets to create songplays
     # table
